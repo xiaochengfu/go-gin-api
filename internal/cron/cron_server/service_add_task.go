@@ -9,8 +9,7 @@ import (
 )
 
 func (s *server) AddTask(task *cron_task_repo.CronTask) {
-	spec := "0 " + strings.TrimSpace(task.Spec)
+	spec := strings.TrimSpace(task.Spec)
 	name := cast.ToString(task.Id)
-
 	s.cron.AddFunc(spec, s.AddJob(task), name)
 }
