@@ -6,6 +6,7 @@ import (
 	"github.com/xinliangnote/go-gin-api/internal/api/controller/config_handler"
 	"github.com/xinliangnote/go-gin-api/internal/api/controller/cron_handler"
 	"github.com/xinliangnote/go-gin-api/internal/api/controller/menu_handler"
+	"github.com/xinliangnote/go-gin-api/internal/api/controller/remind_plan_handler"
 	"github.com/xinliangnote/go-gin-api/internal/api/controller/tool_handler"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/core"
 )
@@ -14,6 +15,14 @@ func setApiRouter(r *resource) {
 
 	// admin
 	adminHandler := admin_handler.New(r.logger, r.db, r.cache)
+	remindPlanHandler := remind_plan_handler.New(r.logger, r.db, r.cache)
+
+	// 游客
+	guest := r.mux.Group("/api/guest")
+	{
+		//提醒列表
+		guest.GET("/remind/plan-list", remindPlanHandler.List())
+	}
 
 	// 需要签名验证，无需登录验证，无需 RBAC 权限验证
 	login := r.mux.Group("/api", r.middles.Signature())
@@ -89,6 +98,5 @@ func setApiRouter(r *resource) {
 		api.POST("/cron/:id", core.AliasForRecordMetrics("/api/cron/modify"), cronHandler.Modify())
 		api.PATCH("/cron/used", cronHandler.UpdateUsed())
 		api.PATCH("/cron/exec/:id", core.AliasForRecordMetrics("/api/cron/exec"), cronHandler.Execute())
-
 	}
 }

@@ -1,9 +1,10 @@
 package remind_plan_handler
 
 import (
+	"github.com/xinliangnote/go-gin-api/internal/api/service/remind_plan_service"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/cache"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/core"
-
+	"github.com/xinliangnote/go-gin-api/internal/pkg/db"
 	"go.uber.org/zap"
 )
 
@@ -34,8 +35,17 @@ type Handler interface {
 }
 
 type handler struct {
-	logger *zap.Logger
-	cache  cache.Repo
+	logger            *zap.Logger
+	cache             cache.Repo
+	remindPlanService remind_plan_service.Service
+}
+
+func New(logger *zap.Logger, db db.Repo, cache cache.Repo) Handler {
+	return &handler{
+		logger:            logger,
+		cache:             cache,
+		remindPlanService: remind_plan_service.New(db),
+	}
 }
 
 func (h *handler) i() {}

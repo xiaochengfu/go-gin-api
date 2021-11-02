@@ -68,6 +68,8 @@ const (
 	CronListError    = 20403
 	CronDetailError  = 20404
 	CronExecuteError = 20405
+
+	RemindPlanListError = 20501
 )
 
 func Text(code int) string {
