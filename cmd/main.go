@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/xinliangnote/go-gin-api/cmd/remind"
 	"os"
+
+	"github.com/xinliangnote/go-gin-api/cmd/remind"
+
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{}

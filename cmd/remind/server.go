@@ -2,7 +2,7 @@ package remind
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
+
 	"github.com/xinliangnote/go-gin-api/configs"
 	"github.com/xinliangnote/go-gin-api/internal/cron/remind_server"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/cache"
@@ -11,6 +11,8 @@ import (
 	"github.com/xinliangnote/go-gin-api/internal/pkg/notify"
 	"github.com/xinliangnote/go-gin-api/pkg/env"
 	"github.com/xinliangnote/go-gin-api/pkg/logger"
+
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
@@ -89,7 +91,15 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	panic(planList)
+	for _, v := range planList {
+		fmt.Printf("%#v", v)
+		planItem := v
+		second := remind.ConvSecond(planItem.Time)
+		//获取提醒信息
+		libraries, err := remind.LibraryListByPlan(planItem)
+
+		fmt.Println(second)
+	}
 	fmt.Println("remind ok")
 	return nil
 }

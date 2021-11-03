@@ -1,8 +1,8 @@
 package remind_server
 
 import (
+	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_library_repo"
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
-	"github.com/xinliangnote/go-gin-api/internal/pkg/core"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/db"
 )
 
@@ -13,12 +13,12 @@ type Server interface {
 	RepeatRemind()
 	OnceRemind()
 	PlanList() (list []*remind_plan_repo.RemindPlan, err error)
-	//LibraryListByPlan()
+	ConvSecond(t string) int64
+	LibraryListByPlan(plan remind_plan_repo.RemindPlan) (libraryList []*remind_library_repo.RemindLibrary, err error)
 }
 
 type server struct {
-	db  db.Repo
-	ctx core.Context
+	db db.Repo
 }
 
 func New(db db.Repo) *server {
