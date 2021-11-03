@@ -16,7 +16,6 @@ func setApiRouter(r *resource) {
 	// admin
 	adminHandler := admin_handler.New(r.logger, r.db, r.cache)
 	remindPlanHandler := remind_plan_handler.New(r.logger, r.db, r.cache)
-
 	// 游客
 	guest := r.mux.Group("/api/guest")
 	{
