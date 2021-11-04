@@ -14,7 +14,8 @@ type Server interface {
 	OnceRemind()
 	PlanList() (list []*remind_plan_repo.RemindPlan, err error)
 	ConvSecond(t string) int64
-	LibraryListByPlan(plan remind_plan_repo.RemindPlan) (libraryList []*remind_library_repo.RemindLibrary, err error)
+	LibraryListByPlan(plan *remind_plan_repo.RemindPlan) (libraryList []*remind_library_repo.RemindLibrary, err error)
+	LibraryListByCategoryId(categoryId int32) ([]*remind_library_repo.RemindLibrary, error)
 }
 
 type server struct {

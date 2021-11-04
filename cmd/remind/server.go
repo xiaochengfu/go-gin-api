@@ -2,6 +2,7 @@ package remind
 
 import (
 	"fmt"
+	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
 
 	"github.com/xinliangnote/go-gin-api/configs"
 	"github.com/xinliangnote/go-gin-api/internal/cron/remind_server"
@@ -97,7 +98,14 @@ func run() error {
 		second := remind.ConvSecond(planItem.Time)
 		//获取提醒信息
 		libraries, err := remind.LibraryListByPlan(planItem)
+		if err != nil {
+			return err
+		}
+		if planItem.Type == remind_plan_repo.TypeSpecifyTime {
 
+		} else if planItem.Type == remind_plan_repo.TypeIntervalTime {
+
+		}
 		fmt.Println(second)
 	}
 	fmt.Println("remind ok")

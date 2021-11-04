@@ -15,3 +15,13 @@ type RemindPlan struct {
 	CreateTime int32  //
 	UpdateTime int32  //
 }
+
+const (
+	TypeSpecifyTime  = 1 //指定时间
+	TypeIntervalTime = 2 //间隔时间
+	StatusNormal     = 1 //正常
+	StatusClose      = 2 //关闭
+	RemindRand       = 1 //随机
+	RemindSort       = 2 //顺序
+
+)
