@@ -11,7 +11,7 @@ var _ Server = (*server)(nil)
 type Server interface {
 	i()
 	RepeatRemind()
-	OnceRemind()
+	OnceRemind(item *remind_plan_repo.RemindPlan)
 	PlanList() (list []*remind_plan_repo.RemindPlan, err error)
 	ConvSecond(t string) int64
 	LibraryListByPlan(plan *remind_plan_repo.RemindPlan) (libraryList []*remind_library_repo.RemindLibrary, err error)

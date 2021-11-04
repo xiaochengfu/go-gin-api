@@ -3,6 +3,7 @@ package remind
 import (
 	"fmt"
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
+	"time"
 
 	"github.com/xinliangnote/go-gin-api/configs"
 	"github.com/xinliangnote/go-gin-api/internal/cron/remind_server"
@@ -89,6 +90,7 @@ func run() error {
 
 	remind := remind_server.New(s.Db)
 	planList, err := remind.PlanList()
+	onlyTime := time.Now().Format("15:04:00")
 	if err != nil {
 		return err
 	}
@@ -102,7 +104,14 @@ func run() error {
 			return err
 		}
 		if planItem.Type == remind_plan_repo.TypeSpecifyTime {
-
+			if onlyTime == planItem.Time {
+				//关闭任务
+				err := remind.ClonePlan(planItem.Id)
+				if err != nil {
+					return err
+				}
+				remind.OnceRemind(planItem)
+			}
 		} else if planItem.Type == remind_plan_repo.TypeIntervalTime {
 
 		}
