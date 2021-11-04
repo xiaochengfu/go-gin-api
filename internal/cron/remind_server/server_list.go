@@ -1,11 +1,13 @@
 package remind_server
 
 import (
-	"github.com/spf13/cast"
+	"strings"
+
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo"
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_library_repo"
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
-	"strings"
+
+	"github.com/spf13/cast"
 )
 
 func (s *server) PlanList() (list []*remind_plan_repo.RemindPlan, err error) {

@@ -1,12 +1,19 @@
 package remind_server
 
 import (
+	"fmt"
+
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo"
+	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_library_repo"
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
 )
 
-func (s *server) OnceRemind(item *remind_plan_repo.RemindPlan) {
-
+func (s *server) OnceRemind(libraries []*remind_library_repo.RemindLibrary) {
+	remindMsg := ""
+	for i := 0; i < len(libraries); i++ {
+		remindMsg += libraries[i].Body
+	}
+	fmt.Println("提醒成功，内容：", remindMsg)
 }
 
 func (s *server) ClonePlan(id int32) error {

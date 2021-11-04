@@ -2,10 +2,10 @@ package remind
 
 import (
 	"fmt"
-	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
 	"time"
 
 	"github.com/xinliangnote/go-gin-api/configs"
+	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
 	"github.com/xinliangnote/go-gin-api/internal/cron/remind_server"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/cache"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/core"
@@ -72,6 +72,7 @@ var (
 			return run()
 		},
 	}
+	TickerList = make(map[int32]*remind_server.TickerBody)
 )
 
 func run() error {
@@ -110,10 +111,23 @@ func run() error {
 				if err != nil {
 					return err
 				}
-				remind.OnceRemind(planItem)
+				remind.OnceRemind(libraries)
 			}
 		} else if planItem.Type == remind_plan_repo.TypeIntervalTime {
-
+			if _, ok := TickerList[planItem.Id]; !ok {
+				TickerList[planItem.Id] = &remind_server.TickerBody{
+					CircleStart:           false,
+					Circle:                int8(planItem.CircleType),
+					LastExecTime:          time.Now().Unix(),
+					CircleTime:            second,
+					LibraryList:           libraries,
+					LastExecLibraryOffset: 0,
+				}
+			}
+			isNeed := remind.NeedRemind(TickerList[planItem.Id])
+			if isNeed {
+				remind.RepeatRemind(TickerList[planItem.Id])
+			}
 		}
 		fmt.Println(second)
 	}
