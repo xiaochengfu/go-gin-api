@@ -31,7 +31,7 @@ import (
 func main() {
 	// 初始化 access logger
 	accessLogger, err := logger.NewJSONLogger(
-		logger.WithDisableConsole(),
+		//logger.WithDisableConsole(),
 		logger.WithField("domain", fmt.Sprintf("%s[%s]", configs.ProjectName, env.Active().Value())),
 		logger.WithTimeLayout("2006-01-02 15:04:05"),
 		logger.WithFileP(configs.ProjectAccessLogFile),
@@ -42,7 +42,7 @@ func main() {
 
 	// 初始化 cron logger
 	cronLogger, err := logger.NewJSONLogger(
-		logger.WithDisableConsole(),
+		//logger.WithDisableConsole(),
 		logger.WithField("domain", fmt.Sprintf("%s[%s]", configs.ProjectName, env.Active().Value())),
 		logger.WithTimeLayout("2006-01-02 15:04:05"),
 		logger.WithFileP(configs.ProjectCronLogFile),
