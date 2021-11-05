@@ -89,48 +89,53 @@ func run() error {
 	fmt.Println(cronLogger)
 	s, _ := NewServer(cronLogger)
 
-	remind := remind_server.New(s.Db)
-	planList, err := remind.PlanList()
-	onlyTime := time.Now().Format("15:04:00")
-	if err != nil {
-		return err
-	}
-	for _, v := range planList {
-		fmt.Printf("%#v", v)
-		planItem := v
-		second := remind.ConvSecond(planItem.Time)
-		//获取提醒信息
-		libraries, err := remind.LibraryListByPlan(planItem)
-		if err != nil {
-			return err
-		}
-		if planItem.Type == remind_plan_repo.TypeSpecifyTime {
-			if onlyTime == planItem.Time {
-				//关闭任务
-				err := remind.ClonePlan(planItem.Id)
+	timer := time.NewTicker(5 * time.Second)
+	defer timer.Stop()
+	for {
+		select {
+		case <-timer.C:
+			remind := remind_server.New(s.Db)
+			planList, err := remind.PlanList()
+			onlyTime := time.Now().Format("15:04:00")
+			if err != nil {
+				return err
+			}
+			for _, v := range planList {
+				fmt.Printf("%#v", v)
+				planItem := v
+				second := remind.ConvSecond(planItem.Time)
+				//获取提醒信息
+				libraries, err := remind.LibraryListByPlan(planItem)
 				if err != nil {
 					return err
 				}
-				remind.OnceRemind(libraries)
-			}
-		} else if planItem.Type == remind_plan_repo.TypeIntervalTime {
-			if _, ok := TickerList[planItem.Id]; !ok {
-				TickerList[planItem.Id] = &remind_server.TickerBody{
-					CircleStart:           false,
-					Circle:                int8(planItem.CircleType),
-					LastExecTime:          time.Now().Unix(),
-					CircleTime:            second,
-					LibraryList:           libraries,
-					LastExecLibraryOffset: 0,
+				if planItem.Type == remind_plan_repo.TypeSpecifyTime {
+					if onlyTime == planItem.Time {
+						//关闭任务
+						err := remind.ClonePlan(planItem.Id)
+						if err != nil {
+							return err
+						}
+						remind.OnceRemind(libraries)
+					}
+				} else if planItem.Type == remind_plan_repo.TypeIntervalTime {
+					if _, ok := TickerList[planItem.Id]; !ok {
+						TickerList[planItem.Id] = &remind_server.TickerBody{
+							CircleStart:           false,
+							Circle:                int8(planItem.CircleType),
+							LastExecTime:          time.Now().Unix(),
+							CircleTime:            second,
+							LibraryList:           libraries,
+							LastExecLibraryOffset: 0,
+						}
+					}
+					isNeed := remind.NeedRemind(TickerList[planItem.Id])
+					if isNeed {
+						remind.RepeatRemind(TickerList[planItem.Id])
+					}
 				}
 			}
-			isNeed := remind.NeedRemind(TickerList[planItem.Id])
-			if isNeed {
-				remind.RepeatRemind(TickerList[planItem.Id])
-			}
 		}
-		fmt.Println(second)
 	}
-	fmt.Println("remind ok")
-	return nil
+
 }
