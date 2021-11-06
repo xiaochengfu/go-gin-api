@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/xinliangnote/go-gin-api/configs"
@@ -24,6 +25,9 @@ func (m *middleware) Jwt(ctx core.Context) (userId int64, userName string, err e
 
 	cfg := configs.Get().JWT
 	claims, errParse := token.New(cfg.Secret).JwtParse(auth)
+	fmt.Println(cfg.Secret)
+	fmt.Println(auth)
+	fmt.Println(claims)
 	if errParse != nil {
 		err = errno.NewError(
 			http.StatusUnauthorized,
