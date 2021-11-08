@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/xinliangnote/go-gin-api/cmd/remind"
 	"net/http"
 	"time"
 
@@ -67,6 +68,13 @@ func main() {
 		Addr:    configs.ProjectPort,
 		Handler: s.Mux,
 	}
+
+	go func() {
+		err := remind.Run(s)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

@@ -2,6 +2,8 @@ package remind
 
 import (
 	"fmt"
+	"github.com/xinliangnote/go-gin-api/internal/router"
+	"github.com/xinliangnote/go-gin-api/internal/websocket/socket_conn/system_message"
 	"time"
 
 	"github.com/xinliangnote/go-gin-api/configs"
@@ -69,11 +71,67 @@ var (
 		PreRun: func(cmd *cobra.Command, args []string) {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run()
+			return nil
 		},
 	}
 	TickerList = make(map[int32]*remind_server.TickerBody)
 )
+
+func Run(s *router.Server) error {
+	timer := time.NewTicker(5 * time.Second)
+	defer timer.Stop()
+	for {
+		conn, _ := system_message.GetConn()
+		if conn == nil {
+			continue
+		}
+		remind := remind_server.New(s.Db, conn)
+		select {
+		case <-timer.C:
+			planList, err := remind.PlanList()
+			onlyTime := time.Now().Format("15:04:00")
+			if err != nil {
+				return err
+			}
+			for _, v := range planList {
+				fmt.Printf("%#v", v)
+				planItem := v
+				second := remind.ConvSecond(planItem.Time)
+				//获取提醒信息
+				libraries, err := remind.LibraryListByPlan(planItem)
+				if err != nil {
+					return err
+				}
+				if planItem.Type == remind_plan_repo.TypeSpecifyTime {
+					if onlyTime == planItem.Time {
+						//关闭任务
+						err := remind.ClonePlan(planItem.Id)
+						if err != nil {
+							return err
+						}
+						remind.OnceRemind(libraries)
+					}
+				} else if planItem.Type == remind_plan_repo.TypeIntervalTime {
+					if _, ok := TickerList[planItem.Id]; !ok {
+						TickerList[planItem.Id] = &remind_server.TickerBody{
+							CircleStart:           false,
+							Circle:                int8(planItem.CircleType),
+							LastExecTime:          time.Now().Unix(),
+							CircleTime:            second,
+							LibraryList:           libraries,
+							LastExecLibraryOffset: 0,
+						}
+					}
+					isNeed := remind.NeedRemind(TickerList[planItem.Id])
+					if isNeed {
+						remind.RepeatRemind(TickerList[planItem.Id])
+					}
+				}
+			}
+		}
+	}
+
+}
 
 func run() error {
 	// 初始化 cron logger
@@ -94,7 +152,7 @@ func run() error {
 	for {
 		select {
 		case <-timer.C:
-			remind := remind_server.New(s.Db)
+			remind := remind_server.New(s.Db, nil)
 			planList, err := remind.PlanList()
 			onlyTime := time.Now().Format("15:04:00")
 			if err != nil {

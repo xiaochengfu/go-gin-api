@@ -4,6 +4,7 @@ import (
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_library_repo"
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
 	"github.com/xinliangnote/go-gin-api/internal/pkg/db"
+	"github.com/xinliangnote/go-gin-api/internal/websocket/socket_server"
 )
 
 var _ Server = (*server)(nil)
@@ -29,12 +30,14 @@ type TickerBody struct {
 }
 
 type server struct {
-	db db.Repo
+	db        db.Repo
+	wsConnect socket_server.Server
 }
 
-func New(db db.Repo) *server {
+func New(db db.Repo, wsConnect socket_server.Server) *server {
 	return &server{
-		db: db,
+		db:        db,
+		wsConnect: wsConnect,
 	}
 }
 

@@ -25,6 +25,7 @@ func (h *handler) Connect() core.HandlerFunc {
 		}
 
 		server, err = socket_server.New(h.logger, h.db, h.cache, ws)
+		//todo server需要存储为列表，因为有多个连接
 		if err != nil {
 			return
 		}

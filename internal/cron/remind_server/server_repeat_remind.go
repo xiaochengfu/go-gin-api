@@ -25,6 +25,10 @@ func (s *server) RepeatRemind(body *TickerBody) {
 	}
 	library := body.LibraryList[next]
 	remindMsg := library.Body
+	err := s.wsConnect.OnSend([]byte(remindMsg))
+	if err != nil {
+		fmt.Println("ws推送失败")
+	}
 	fmt.Println("提醒成功，内容：", remindMsg)
 	body.LastExecLibraryOffset = next
 	body.LastExecTime = time.Now().Unix()
