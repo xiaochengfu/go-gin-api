@@ -25,21 +25,21 @@ func (s *server) RepeatRemind(body *TickerBody) {
 	}
 	library := body.LibraryList[next]
 	remindMsg := library.Body
-	err := s.wsConnect.OnSend([]byte(remindMsg))
+	err := s.wsConnect.OnSend(int64(library.UserId), []byte(remindMsg))
 	if err != nil {
-		fmt.Println("ws推送失败")
+		fmt.Println("推送失败")
 	}
 	fmt.Println("提醒成功，内容：", remindMsg)
 	body.LastExecLibraryOffset = next
 	body.LastExecTime = time.Now().Unix()
 	body.CircleStart = true
-	fmt.Printf("更改后的执行内容：%#v", body)
+	//fmt.Printf("更改后的执行内容：%#v", body)
 }
 
 func (s *server) NeedRemind(tickerBody *TickerBody) bool {
-	fmt.Println("上次提醒时间：", tickerBody.LastExecTime)
+	//fmt.Println("上次提醒时间：", tickerBody.LastExecTime)
 	fmt.Println("每隔几秒提醒：", tickerBody.CircleTime)
-	fmt.Println("当前时间：", time.Now().Unix())
+	//fmt.Println("当前时间：", time.Now().Unix())
 	if time.Now().Unix() >= tickerBody.LastExecTime+tickerBody.CircleTime {
 		return true
 	} else {

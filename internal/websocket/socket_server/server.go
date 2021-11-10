@@ -16,6 +16,7 @@ type server struct {
 	db     db.Repo
 	cache  cache.Repo
 	socket *websocket.Conn
+	Users  map[int64]*websocket.Conn
 }
 
 type Server interface {
@@ -25,7 +26,7 @@ type Server interface {
 	OnMessage()
 
 	// OnSend 发送消息
-	OnSend(message []byte) error
+	OnSend(userId int64, message []byte) error
 
 	// OnClose 关闭
 	OnClose()
@@ -53,6 +54,7 @@ func New(logger *zap.Logger, db db.Repo, cache cache.Repo, conn *websocket.Conn)
 		db:     db,
 		cache:  cache,
 		socket: conn,
+		Users:  make(map[int64]*websocket.Conn),
 	}, nil
 }
 

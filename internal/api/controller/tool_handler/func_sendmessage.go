@@ -74,7 +74,7 @@ func (h *handler) SendMessage() core.HandlerFunc {
 			return
 		}
 
-		err = conn.OnSend(messageJsonData)
+		err = conn.OnSend(1, messageJsonData)
 		if err != nil {
 			ctx.AbortWithError(errno.NewError(
 				http.StatusBadRequest,

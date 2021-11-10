@@ -35,7 +35,9 @@ type Request struct {
 type LoginRequest struct {
 	Request
 	Data struct {
-		Token string `json:"token"`
+		Token    string `json:"token"`
+		UserId   int64  `json:"user_id"`
+		Username string `json:"username"`
 	}
 }
 
@@ -54,6 +56,7 @@ func (s *server) processMsg(message []byte) (err error) {
 		return err
 	}
 	var jsonMsg []byte
+	var userId int64
 	switch request.Cmd {
 	case "login":
 		//验证用户，存储用户信息
@@ -63,7 +66,7 @@ func (s *server) processMsg(message []byte) (err error) {
 			return err
 		}
 		var response *LoginResponse
-		response, err = userLogin(loginRequest)
+		response, userId, err = userLogin(loginRequest)
 		if err != nil {
 			return errors.Wrap(err, "登录命令处理失败")
 		}
@@ -71,8 +74,10 @@ func (s *server) processMsg(message []byte) (err error) {
 		if err != nil {
 			return err
 		}
+		s.Users[userId] = s.socket
+		fmt.Printf("Users:%v", s.Users)
 	}
-	err = s.OnSend(jsonMsg)
+	err = s.OnSend(userId, jsonMsg)
 	if err != nil {
 		return err
 	}
@@ -80,15 +85,15 @@ func (s *server) processMsg(message []byte) (err error) {
 	return
 }
 
-func userLogin(request *LoginRequest) (*LoginResponse, error) {
+func userLogin(request *LoginRequest) (*LoginResponse, int64, error) {
 	fmt.Println(request.Data.Token)
 	//cfg := configs.Get().JWT
 	//claims, err := token.New(cfg.Secret).JwtParse(request.Data.Token)
 	//if err != nil {
 	//	return nil, errors.Wrap(err,"token解析失败")
 	//}
-	userId := int64(1)
-	username := "houpeng"
+	userId := request.Data.UserId
+	username := request.Data.Username
 	loginResponse := &LoginResponse{
 		Request: Request{
 			Cmd:   request.Cmd,
@@ -102,5 +107,5 @@ func userLogin(request *LoginRequest) (*LoginResponse, error) {
 			Username string
 		}{UserId: userId, Username: username}),
 	}
-	return loginResponse, nil
+	return loginResponse, userId, nil
 }
