@@ -17,3 +17,4 @@
 
 logs
 .idea
+configs/fat_configs.toml

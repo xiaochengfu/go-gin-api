@@ -29,7 +29,6 @@ func (h *handler) Connect() core.HandlerFunc {
 		if err != nil {
 			return
 		}
-
 		go server.OnMessage()
 	}
 }

@@ -83,18 +83,19 @@ func Run(s *router.Server) error {
 	for {
 		conn, _ := system_message.GetConn()
 		if conn == nil {
+			fmt.Println("无socket连接，继续等待")
 			continue
 		}
 		remind := remind_server.New(s.Db, conn)
 		select {
 		case <-timer.C:
 			planList, err := remind.PlanList()
+			fmt.Println("5s到了，当前时间" + time.Now().String())
 			onlyTime := time.Now().Format("15:04:00")
 			if err != nil {
 				return err
 			}
 			for _, v := range planList {
-				fmt.Printf("%#v", v)
 				planItem := v
 				second := remind.ConvSecond(planItem.Time)
 				//获取提醒信息

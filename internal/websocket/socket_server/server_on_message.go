@@ -74,8 +74,8 @@ func (s *server) processMsg(message []byte) (err error) {
 		if err != nil {
 			return err
 		}
-		s.Users[userId] = s.socket
-		fmt.Printf("Users:%v", s.Users)
+		clientManager.Users[userId] = s.socket
+		fmt.Printf("Users:%v", clientManager.Users)
 	}
 	err = s.OnSend(userId, jsonMsg)
 	if err != nil {

@@ -10,8 +10,8 @@ import (
 func (s *server) OnSend(userId int64, message []byte) error {
 	//err := s.socket.WriteMessage(websocket.TextMessage, message)
 	fmt.Println("给用户" + strconv.Itoa(int(userId)) + "推送")
-	fmt.Println("users列表为:", s.Users)
-	if client, ok := s.Users[userId]; ok {
+	fmt.Println("users列表为:", clientManager.Users)
+	if client, ok := clientManager.Users[userId]; ok {
 		err := client.WriteMessage(websocket.TextMessage, message)
 		if err != nil {
 			s.OnClose()
