@@ -127,6 +127,7 @@ func Run(s *router.Server) error {
 					if isNeed {
 						remind.RepeatRemind(TickerList[planItem.Id])
 					}
+					fmt.Println("一次5s循环结束")
 				}
 			}
 		}
