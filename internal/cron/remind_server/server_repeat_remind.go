@@ -1,12 +1,22 @@
 package remind_server
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/xinliangnote/go-gin-api/internal/websocket/socket_server"
 	"math/rand"
 	"time"
 
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
 )
+
+type RemindResponse struct {
+	socket_server.Request
+	Response struct {
+		Body string `json:"body"`
+		Msg  string `json:"msg"`
+	} `json:"response"`
+}
 
 func (s *server) RepeatRemind(body *TickerBody) {
 	var next int
@@ -25,7 +35,18 @@ func (s *server) RepeatRemind(body *TickerBody) {
 	}
 	library := body.LibraryList[next]
 	remindMsg := library.Body
-	err := s.wsConnect.OnSend(int64(library.UserId), []byte(remindMsg))
+	remindResponse := &RemindResponse{
+		Request: socket_server.Request{
+			MsgId: "adaf",
+			Cmd:   "remind",
+		},
+		Response: struct {
+			Body string `json:"body"`
+			Msg  string `json:"msg"`
+		}{remindMsg, "提醒成功"},
+	}
+	jsonResponse, _ := json.Marshal(remindResponse)
+	err := s.wsConnect.OnSend(int64(library.UserId), jsonResponse)
 	if err != nil {
 		fmt.Println("推送失败")
 	}

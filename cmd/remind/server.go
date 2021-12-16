@@ -84,6 +84,7 @@ func Run(s *router.Server) error {
 		conn, _ := system_message.GetConn()
 		if conn == nil {
 			fmt.Println("无socket连接，继续等待")
+			time.Sleep(3 * time.Second)
 			continue
 		}
 		remind := remind_server.New(s.Db, conn)
