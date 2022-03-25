@@ -45,6 +45,27 @@ func (s *server) RepeatRemind(body *TickerBody) {
 			Msg  string `json:"msg"`
 		}{remindMsg, "提醒成功"},
 	}
+	FeiShuMsg := &FeiShuMsg{
+		Config: struct {
+			WideScreenMode bool `json:"wide_screen_mode"`
+		}{},
+		Header: struct {
+			Template string `json:"template"`
+			Title    struct {
+				Content string `json:"content"`
+				Tag     string `json:"tag"`
+			} `json:"title"`
+		}{},
+		I18NElements: struct {
+			ZhCn []struct {
+				Tag  string `json:"tag"`
+				Text struct {
+					Content string `json:"content"`
+					Tag     string `json:"tag"`
+				} `json:"text"`
+			} `json:"zh_cn"`
+		}{},
+	}
 	jsonResponse, _ := json.Marshal(remindResponse)
 	err := s.wsConnect.OnSend(int64(library.UserId), jsonResponse)
 	if err != nil {
@@ -66,4 +87,26 @@ func (s *server) NeedRemind(tickerBody *TickerBody) bool {
 	} else {
 		return false
 	}
+}
+
+type FeiShuMsg struct {
+	Config struct {
+		WideScreenMode bool `json:"wide_screen_mode"`
+	} `json:"config"`
+	Header struct {
+		Template string `json:"template"`
+		Title    struct {
+			Content string `json:"content"`
+			Tag     string `json:"tag"`
+		} `json:"title"`
+	} `json:"header"`
+	I18NElements struct {
+		ZhCn []struct {
+			Tag  string `json:"tag"`
+			Text struct {
+				Content string `json:"content"`
+				Tag     string `json:"tag"`
+			} `json:"text"`
+		} `json:"zh_cn"`
+	} `json:"i18n_elements"`
 }
