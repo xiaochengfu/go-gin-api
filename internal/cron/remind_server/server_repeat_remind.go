@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/xinliangnote/go-gin-api/internal/websocket/socket_server"
+	"io"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/xinliangnote/go-gin-api/internal/api/repository/db_repo/remind_plan_repo"
@@ -35,28 +39,40 @@ func (s *server) RepeatRemind(body *TickerBody) {
 	}
 	library := body.LibraryList[next]
 	remindMsg := library.Body
-	remindResponse := &RemindResponse{
-		Request: socket_server.Request{
-			MsgId: "adaf",
-			Cmd:   "remind",
-		},
-		Response: struct {
-			Body string `json:"body"`
-			Msg  string `json:"msg"`
-		}{remindMsg, "提醒成功"},
-	}
 	FeiShuMsg := &FeiShuMsg{
-		Config: struct {
+		MsgType: "interactive",
+		Card: struct {
+			Config struct {
+				WideScreenMode bool `json:"wide_screen_mode"`
+			} `json:"config"`
+			Header struct {
+				Template string `json:"template"`
+				Title    struct {
+					Content string `json:"content"`
+					Tag     string `json:"tag"`
+				} `json:"title"`
+			} `json:"header"`
+			I18NElements struct {
+				ZhCn []struct {
+					Tag  string `json:"tag"`
+					Text struct {
+						Content string `json:"content"`
+						Tag     string `json:"tag"`
+					} `json:"text"`
+				} `json:"zh_cn"`
+			} `json:"i18n_elements"`
+		}{Config: struct {
 			WideScreenMode bool `json:"wide_screen_mode"`
-		}{},
-		Header: struct {
+		}{true}, Header: struct {
 			Template string `json:"template"`
 			Title    struct {
 				Content string `json:"content"`
 				Tag     string `json:"tag"`
 			} `json:"title"`
-		}{},
-		I18NElements: struct {
+		}{Template: "orange", Title: struct {
+			Content string `json:"content"`
+			Tag     string `json:"tag"`
+		}{remindMsg, "plain_text"}}, I18NElements: struct {
 			ZhCn []struct {
 				Tag  string `json:"tag"`
 				Text struct {
@@ -64,13 +80,45 @@ func (s *server) RepeatRemind(body *TickerBody) {
 					Tag     string `json:"tag"`
 				} `json:"text"`
 			} `json:"zh_cn"`
-		}{},
+		}{ZhCn: []struct {
+			Tag  string `json:"tag"`
+			Text struct {
+				Content string `json:"content"`
+				Tag     string `json:"tag"`
+			} `json:"text"`
+		}{struct {
+			Tag  string `json:"tag"`
+			Text struct {
+				Content string `json:"content"`
+				Tag     string `json:"tag"`
+			} `json:"text"`
+		}{Tag: "div", Text: struct {
+			Content string `json:"content"`
+			Tag     string `json:"tag"`
+		}{"提醒次数：1次 \n提醒类型：重复提醒", "lark_md"}}}}},
 	}
-	jsonResponse, _ := json.Marshal(remindResponse)
-	err := s.wsConnect.OnSend(int64(library.UserId), jsonResponse)
+	jsonResponse, _ := json.Marshal(FeiShuMsg)
+	fmt.Println(string(jsonResponse))
+	resp, err := http.Post("https://open.feishu.cn/open-apis/bot/v2/hook/48ad45fc-c177-4899-a7a4-f78365ac0e77",
+		"application/json",
+		strings.NewReader(string(jsonResponse)))
 	if err != nil {
-		fmt.Println("推送失败")
+		fmt.Println(err)
 	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println(string(body))
+			}
+		}
+	}(resp.Body)
+	//err := s.wsConnect.OnSend(int64(library.UserId), jsonResponse)
+	//if err != nil {
+	//	fmt.Println("推送失败")
+	//}
 	fmt.Println("提醒成功，内容：", remindMsg)
 	body.LastExecLibraryOffset = next
 	body.LastExecTime = time.Now().Unix()
@@ -90,23 +138,26 @@ func (s *server) NeedRemind(tickerBody *TickerBody) bool {
 }
 
 type FeiShuMsg struct {
-	Config struct {
-		WideScreenMode bool `json:"wide_screen_mode"`
-	} `json:"config"`
-	Header struct {
-		Template string `json:"template"`
-		Title    struct {
-			Content string `json:"content"`
-			Tag     string `json:"tag"`
-		} `json:"title"`
-	} `json:"header"`
-	I18NElements struct {
-		ZhCn []struct {
-			Tag  string `json:"tag"`
-			Text struct {
+	MsgType string `json:"msg_type"`
+	Card    struct {
+		Config struct {
+			WideScreenMode bool `json:"wide_screen_mode"`
+		} `json:"config"`
+		Header struct {
+			Template string `json:"template"`
+			Title    struct {
 				Content string `json:"content"`
 				Tag     string `json:"tag"`
-			} `json:"text"`
-		} `json:"zh_cn"`
-	} `json:"i18n_elements"`
+			} `json:"title"`
+		} `json:"header"`
+		I18NElements struct {
+			ZhCn []struct {
+				Tag  string `json:"tag"`
+				Text struct {
+					Content string `json:"content"`
+					Tag     string `json:"tag"`
+				} `json:"text"`
+			} `json:"zh_cn"`
+		} `json:"i18n_elements"`
+	} `json:"card"`
 }
